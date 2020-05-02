@@ -36,19 +36,15 @@ var server = http.createServer(function (request, response) {
       if (user === undefined) {
         response.statusCode = 400;
         response.setHeader("Content-Type", "text/json;charset=utf-8");
-        console.log("41");
         response.write("请新用户注册！");
         response.end(`{"errorCode":4001}`);
       } else {
-        console.log("登陆过");
         response.statusCode = 200;
         const random = Math.random();
         const session = JSON.parse(
           fs.readFileSync("./session.json").toString()
         );
-        console.log(typeof session);
         session[random] = { user_id: user.id };
-        console.log("48", session);
         fs.writeFileSync("./session.json", JSON.stringify(session));
         response.setHeader("Set-Cookie", `session_id = ${random};HttpOnly`);
         response.end();
@@ -56,7 +52,6 @@ var server = http.createServer(function (request, response) {
     });
   } else if (path === "/home.html") {
     let homeHTML = fs.readFileSync("./public/home.html").toString();
-    console.log("我是home");
     const session = JSON.parse(fs.readFileSync("session.json").toString());
     const userString = fs.readFileSync("./db/user.json").toString();
     const userArray = JSON.parse(userString);
@@ -69,12 +64,9 @@ var server = http.createServer(function (request, response) {
     } catch (error) {}
     if (sessionID) {
       const ID = session[sessionID];
-      console.log(typeof ID);
-
       const user = userArray.find(
         (user) => user.id.toString() === ID.user_id.toString()
       );
-      console.log(user);
       homeHTML = homeHTML.replace("{{login}}", "您好！" + user.name);
       response.write(homeHTML);
     } else {
@@ -95,10 +87,6 @@ var server = http.createServer(function (request, response) {
     request.on("end", () => {
       const string = Buffer.concat(array).toString();
       const obj = JSON.parse(string);
-      console.log(obj instanceof Array);
-      console.log(typeof obj.password);
-      console.log("38:", userArray);
-
       userArray.push({
         id: userArray.length ? userArray.length + 1 : 1,
         name: obj.name,
